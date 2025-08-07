@@ -4,10 +4,97 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Mail, Phone, MapPin, Github, Linkedin, Download, Menu, X, Globe } from 'lucide-react';
+import { Mail, Phone, MapPin, Github, Linkedin, Download, Menu, X, Globe, Facebook } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export default function CV() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Function to download pre-made PDF file
+  const downloadPDF = () => {
+    const link = document.createElement('a');
+    link.href = '/Yeasin_Arafat_CV.pdf';
+    link.download = 'Yeasin_Arafat_CV.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Function to generate PDF from webpage
+  const generatePDF = async () => {
+    try {
+      // Get the CV content div
+      const element = document.getElementById('cv-content');
+      if (!element) return;
+
+      // Temporarily remove sticky positioning for better PDF generation
+      const stickyElements = element.querySelectorAll('.sticky');
+      stickyElements.forEach(el => {
+        (el as HTMLElement).style.position = 'static';
+        (el as HTMLElement).style.top = 'auto';
+      });
+
+      // Configure html2canvas options
+      const canvas = await html2canvas(element, {
+        scale: 2, // Higher quality
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        height: element.scrollHeight,
+        windowHeight: element.scrollHeight
+      });
+
+      // Restore sticky positioning
+      stickyElements.forEach(el => {
+        (el as HTMLElement).style.position = 'sticky';
+        (el as HTMLElement).style.top = '2rem'; // top-8 = 2rem
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      
+      // Calculate PDF dimensions
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 0;
+
+      // Add image to PDF
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      
+      // If content is too long, split into multiple pages
+      if (imgHeight * ratio > pdfHeight) {
+        const totalPages = Math.ceil(imgHeight * ratio / pdfHeight);
+        
+        for (let i = 1; i < totalPages; i++) {
+          pdf.addPage();
+          const yOffset = -pdfHeight * i;
+          pdf.addImage(imgData, 'PNG', imgX, imgY + yOffset, imgWidth * ratio, imgHeight * ratio);
+        }
+      }
+
+      pdf.save('Yeasin_Arafat_CV_Generated.pdf');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
+      
+      // Ensure sticky positioning is restored even if there's an error
+      const element = document.getElementById('cv-content');
+      if (element) {
+        const stickyElements = element.querySelectorAll('.sticky');
+        stickyElements.forEach(el => {
+          (el as HTMLElement).style.position = 'sticky';
+          (el as HTMLElement).style.top = '2rem';
+        });
+      }
+    }
+  };
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -31,7 +118,7 @@ export default function CV() {
         </div>
       )}
 
-      <div className="container mx-auto px-4 pt-8 md:pt-16 pb-16">
+      <div className="container mx-auto px-4 pt-8 md:pt-16 pb-16" id="cv-content">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Sidebar - Profile Information */}
           <div className="md:col-span-4 lg:col-span-3">
@@ -40,7 +127,7 @@ export default function CV() {
                 <CardHeader className="text-center pb-2">
                   <div className="mx-auto w-32 h-32 rounded-full overflow-hidden mb-4">
                     <img 
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
+                      src="/Yeasin.jpg" 
                       alt="Profile" 
                       className="w-full h-full object-cover"
                     />
@@ -49,11 +136,14 @@ export default function CV() {
                   <p className="text-muted-foreground mt-1">Sr. Software Engineer</p>
                   
                   <div className="flex justify-center mt-4 space-x-2">
-                    <Button size="icon" variant="ghost" aria-label="GitHub">
+                    <Button size="icon" variant="ghost" aria-label="GitHub" onClick={() => window.open('https://github.com/yeasinmahi', '_blank')}>
                       <Github className="h-5 w-5" />
                     </Button>
-                    <Button size="icon" variant="ghost" aria-label="LinkedIn">
+                    <Button size="icon" variant="ghost" aria-label="LinkedIn" onClick={() => window.open('https://www.linkedin.com/in/yeasinmahi/', '_blank')}>
                       <Linkedin className="h-5 w-5" />
+                    </Button>
+                    <Button size="icon" variant="ghost" aria-label="Facebook" onClick={() => window.open('https://www.facebook.com/yeasinmahi72', '_blank')}>
+                      <Facebook className="h-5 w-5" />
                     </Button>
                   </div>
                 </CardHeader>
@@ -64,11 +154,11 @@ export default function CV() {
                   <div className="space-y-4 text-sm">
                     <div className="flex items-start">
                       <Mail className="h-4 w-4 mr-3 mt-1 text-muted-foreground" />
-                      <span>Contact email address</span>
+                      <span>yeasinmahi72@gmail.com</span>
                     </div>
                     <div className="flex items-center">
                       <Phone className="h-4 w-4 mr-3 text-muted-foreground" />
-                      <span>Contact phone number</span>
+                      <span>+8801676272718</span>
                     </div>
                     <div className="flex items-start">
                       <MapPin className="h-4 w-4 mr-3 mt-1 text-muted-foreground" />
@@ -80,9 +170,14 @@ export default function CV() {
                     </div>
                   </div>
                   
-                  <Button variant="outline" className="w-full mt-6">
-                    <Download className="mr-2 h-4 w-4" /> Download CV
-                  </Button>
+                  <div className="space-y-2 mt-6">
+                    <Button variant="outline" className="w-full" onClick={downloadPDF}>
+                      <Download className="mr-2 h-4 w-4" /> Download PDF
+                    </Button>
+                    <Button variant="outline" className="w-full" onClick={generatePDF}>
+                      <Download className="mr-2 h-4 w-4" /> Generate PDF
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -391,11 +486,11 @@ export default function CV() {
                       <div className="space-y-3">
                         <div className="flex items-center">
                           <Mail className="h-4 w-4 mr-3 text-muted-foreground" />
-                          <span>Contact email address</span>
+                          <span>yeasinmahi72@gmail.com</span>
                         </div>
                         <div className="flex items-center">
                           <Phone className="h-4 w-4 mr-3 text-muted-foreground" />
-                          <span>Contact phone number</span>
+                          <span>+8801676272718</span>
                         </div>
                         <div className="flex items-start">
                           <MapPin className="h-4 w-4 mr-3 mt-1 text-muted-foreground" />
@@ -407,11 +502,14 @@ export default function CV() {
                     <div>
                       <h3 className="font-medium mb-2">Social Profiles</h3>
                       <div className="flex space-x-3">
-                        <Button variant="outline" size="icon">
+                        <Button variant="outline" size="icon" onClick={() => window.open('https://github.com/yeasinmahi', '_blank')}>
                           <Github className="h-5 w-5" />
                         </Button>
-                        <Button variant="outline" size="icon">
+                        <Button variant="outline" size="icon" onClick={() => window.open('https://www.linkedin.com/in/yeasinmahi/', '_blank')}>
                           <Linkedin className="h-5 w-5" />
+                        </Button>
+                        <Button variant="outline" size="icon" onClick={() => window.open('https://www.facebook.com/yeasinmahi72', '_blank')}>
+                          <Facebook className="h-5 w-5" />
                         </Button>
                       </div>
                     </div>
