@@ -11,10 +11,13 @@ import html2canvas from 'html2canvas';
 export default function CV() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
+  // Get the base URL for assets
+  const baseUrl = import.meta.env.BASE_URL;
+  
   // Function to download pre-made PDF file
   const downloadPDF = () => {
     const link = document.createElement('a');
-    link.href = '/Yeasin_Arafat_CV.pdf';
+    link.href = `${baseUrl}Yeasin_Arafat_CV.pdf`;
     link.download = 'Yeasin_Arafat_CV.pdf';
     document.body.appendChild(link);
     link.click();
@@ -127,7 +130,7 @@ export default function CV() {
                 <CardHeader className="text-center pb-2">
                   <div className="mx-auto w-32 h-32 rounded-full overflow-hidden mb-4">
                     <img 
-                      src="/Yeasin.jpg" 
+                      src={`${baseUrl}Yeasin.jpg`}
                       alt="Profile" 
                       className="w-full h-full object-cover"
                     />
