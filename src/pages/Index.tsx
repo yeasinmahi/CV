@@ -234,7 +234,7 @@ export default function CV() {
                         <p className="text-muted-foreground">Surbana Jurong</p>
                       </div>
                       <div className="text-right">
-                        <Badge variant="outline">May 2019 - Present</Badge>
+                        <Badge variant="outline">May 2023 - Present</Badge>
                       </div>
                     </div>
                     <ul className="list-disc pl-5 text-muted-foreground space-y-1">
