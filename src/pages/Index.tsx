@@ -28,6 +28,15 @@ const navItems = [
   { href: '#contact', label: 'Contact' },
 ];
 
+const coreStack = [
+  'C# / ASP.NET',
+  'Microservices',
+  'AWS + Azure',
+  'NATS / Kafka',
+  'SQL Server / PostgreSQL',
+  'GenAI Assistants',
+];
+
 export default function CV() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -244,11 +253,21 @@ export default function CV() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Sr. Software Engineer with 8+ years of experience building backend platforms, API integrations, and
+                    Sr. Software Engineer with 10+ years of experience building backend platforms, API integrations, and
                     event-driven services. I have delivered production workloads across 2 cloud environments (AWS and Azure),
                     led development of a Singapore government Town Council GenAI assistant, and drive reliable delivery through
                     practical technical leadership.
                   </p>
+                  <div className="mt-5">
+                    <h3 className="text-sm font-semibold mb-2">Core Stack</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {coreStack.map((skill) => (
+                        <Badge key={skill} variant="outline" className="justify-center py-2">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </section>
@@ -266,9 +285,9 @@ export default function CV() {
                       <Badge variant="outline">2025 - Present</Badge>
                     </div>
                     <ul className="list-disc pl-5 text-muted-foreground space-y-1">
-                      <li>Built a government-facing chatbot with council-specific knowledge bases for business-domain responses.</li>
-                      <li>Implemented ingestion/training from 6 source types: PDF, SharePoint, JSON, Word, text, and websites.</li>
-                      <li>Enabled council-level data separation so each Town Council receives responses from its own dataset.</li>
+                      <li>Built a government-facing chatbot with Town Council-specific knowledge bases for business-domain responses.</li>
+                      <li>Implemented ingestion and training across 6 source formats: PDF, SharePoint, JSON, Word, text, and websites.</li>
+                      <li>Enabled council-level data separation so each Town Council receives responses from its own business dataset.</li>
                     </ul>
                   </div>
 
@@ -281,7 +300,7 @@ export default function CV() {
                     </div>
                     <ul className="list-disc pl-5 text-muted-foreground space-y-1">
                       <li>Built ingestion and transformation pipelines across 2 cloud targets: AWS S3 and Azure Blob Storage.</li>
-                      <li>Developed NATS-based event publishing for vendor analytics and downstream integrations.</li>
+                      <li>Developed NATS-based event publishing services for vendor analytics and downstream integrations.</li>
                       <li>Delivered operational visibility with Power BI dashboards for monitoring and issue triage.</li>
                     </ul>
                   </div>

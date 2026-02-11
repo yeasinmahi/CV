@@ -18,6 +18,7 @@ npm run build
 npm run preview
 npm run lint
 npm run typecheck
+npm run test:e2e
 ```
 
 ## Deployment Notes
