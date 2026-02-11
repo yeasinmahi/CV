@@ -1,61 +1,27 @@
-# Shadcn-UI Template Usage Instructions
+# Personal CV Portfolio
 
-## technology stack
+Single-page portfolio website built with React, TypeScript, Vite, and Tailwind CSS.
 
-This project is built with:
+## Tech Stack
 
-- Vite
+- React 18
 - TypeScript
-- React
-- shadcn-ui
+- Vite
 - Tailwind CSS
+- shadcn/ui primitives
 
-All shadcn/ui components have been downloaded under `@/components/ui`.
+## Scripts
 
-## File Structure
-
-- `index.html` - HTML entry point
-- `vite.config.ts` - Vite configuration file
-- `tailwind.config.js` - Tailwind CSS configuration file
-- `package.json` - NPM dependencies and scripts
-- `src/app.tsx` - Root component of the project
-- `src/main.tsx` - Project entry point
-- `src/index.css` - Existing CSS configuration
-
-## Components
-
-- All shadcn/ui components are pre-downloaded and available at `@/components/ui`
-
-## Styling
-
-- Add global styles to `src/index.css` or create new CSS files as needed
-- Use Tailwind classes for styling components
-
-## Development
-
-- Import components from `@/components/ui` in your React components
-- Customize the UI by modifying the Tailwind configuration
-
-## Note
-
-The `@/` path alias points to the `src/` directory
-
-# Commands
-
-**Install Dependencies**
-
-```shell
-pnpm i
+```bash
+npm run dev
+npm run build
+npm run preview
+npm run lint
+npm run typecheck
 ```
 
-**Start Preview**
+## Deployment Notes
 
-```shell
-pnpm run dev
-```
-
-**To build**
-
-```shell
-pnpm run build
-```
+- Vite base path is set to `/CV/` in `vite.config.ts`.
+- Router basename is derived from `import.meta.env.BASE_URL` in `src/App.tsx`.
+- Keep static assets in `public/` and reference them via `import.meta.env.BASE_URL` when needed.
