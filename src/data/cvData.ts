@@ -14,7 +14,10 @@ export interface SocialLink {
 export interface ProjectEntry {
   title: string;
   period: string;
-  bullets: string[];
+  problem: string;
+  solution: string;
+  impact: string;
+  tech: string[];
 }
 
 export interface ExperienceEntry {
@@ -42,8 +45,16 @@ export interface PersonalDetail {
   value: string;
 }
 
+export interface StatItem {
+  value: string;
+  label: string;
+}
+
 export const profileName = 'Md. Yeasin Arafat';
 export const profileTitle = 'Sr. Software Engineer';
+export const heroValueStatement =
+  'I build production-ready backend platforms and GenAI assistants that simplify operations and deliver measurable business outcomes.';
+export const socialProofBadge = 'Worked on Singapore government Town Council GenAI project';
 
 export const navItems: NavItem[] = [
   { href: '#about', label: 'About' },
@@ -69,7 +80,14 @@ export const contactDetails = {
 };
 
 export const aboutSummary =
-  'Sr. Software Engineer with 10+ years of experience building backend platforms, API integrations, and event-driven services. I have delivered production workloads across 2 cloud environments (AWS and Azure), led development of a Singapore government Town Council GenAI assistant, and drive reliable delivery through practical technical leadership.';
+  'Senior backend engineer with 10+ years of experience delivering API-first platforms, event-driven services, and enterprise integrations. I focus on dependable architecture, fast delivery, and practical leadership that improves team output.';
+
+export const statsStrip: StatItem[] = [
+  { value: '10+', label: 'Years Experience' },
+  { value: '2', label: 'Cloud Platforms' },
+  { value: '6', label: 'Data Source Types' },
+  { value: '5+', label: 'Enterprise Integrations' },
+];
 
 export const coreStack = [
   'C# / ASP.NET',
@@ -84,20 +102,21 @@ export const keyProjects: ProjectEntry[] = [
   {
     title: 'Singapore Town Council GenAI Assistant',
     period: '2025 - Present',
-    bullets: [
-      'Reduced manual knowledge lookup by centralizing Town Council-specific policy and process answers in one assistant.',
-      'Cut knowledge onboarding effort by supporting 6 source formats: PDF, SharePoint, JSON, Word, text, and websites.',
-      "Improved answer relevance by enforcing council-scoped data retrieval for each Town Council's dataset.",
-    ],
+    problem: 'Town Council teams spent time manually searching fragmented SOP and policy knowledge before responding.',
+    solution:
+      'Built a council-scoped GenAI assistant trained via ingestion pipelines across PDF, SharePoint, JSON, Word, text, and websites.',
+    impact:
+      'Faster knowledge retrieval, improved answer relevance, and clearer separation of responses by individual Town Council business context.',
+    tech: ['C#', 'ASP.NET', 'GenAI', 'RAG', 'SharePoint', 'JSON'],
   },
   {
     title: 'Cross-Cloud IoT Data Platform',
     period: '2023 - Present',
-    bullets: [
-      'Improved ingestion resiliency by deploying mirrored pipelines across 2 cloud targets: AWS S3 and Azure Blob.',
-      'Reduced vendor data delivery friction through NATS-based event publishing for downstream analytics.',
-      'Improved triage speed with Power BI monitoring dashboards and consolidated operational views.',
-    ],
+    problem: 'IoT data delivery and analytics were affected by fragmented vendor pipelines and weak observability.',
+    solution:
+      'Implemented mirrored ingestion workflows across AWS S3 and Azure Blob with NATS event publishing and dashboarded operations.',
+    impact: 'Higher data reliability, improved monitoring, and faster issue triage for downstream analytics teams.',
+    tech: ['AWS S3', 'Azure Blob', 'NATS', 'Power BI', 'SQL Server'],
   },
 ];
 

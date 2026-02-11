@@ -1,8 +1,9 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { contactDetails, navItems, profileName, profileTitle, socialLinks } from '@/data/cvData';
+import { cn } from '@/lib/utils';
 import { Facebook, Github, Globe, Linkedin, Mail, Phone, Download, MapPin, type LucideIcon } from 'lucide-react';
 
 const socialIconMap: Record<(typeof socialLinks)[number]['icon'], LucideIcon> = {
@@ -13,21 +14,25 @@ const socialIconMap: Record<(typeof socialLinks)[number]['icon'], LucideIcon> = 
 
 type ProfileSidebarProps = {
   baseUrl: string;
+  activeSection: string;
   isGeneratingPdf: boolean;
   onDownloadPdf: () => void;
   onGeneratePdf: () => void;
 };
 
-export function ProfileSidebar({ baseUrl, isGeneratingPdf, onDownloadPdf, onGeneratePdf }: ProfileSidebarProps) {
+export function ProfileSidebar({ baseUrl, activeSection, isGeneratingPdf, onDownloadPdf, onGeneratePdf }: ProfileSidebarProps) {
   return (
     <div className="sticky top-8">
-      <Card className="border-none shadow-lg">
+      <Card data-reveal className="border border-slate-200/70 shadow-lg">
         <CardHeader className="text-center pb-2">
           <div className="mx-auto w-32 h-32 rounded-full overflow-hidden mb-4">
             <img src={`${baseUrl}Yeasin.jpg`} alt="Profile" loading="lazy" className="w-full h-full object-cover" />
           </div>
-          <CardTitle className="text-2xl font-bold">{profileName}</CardTitle>
+          <p className="text-3xl font-bold text-slate-900">{profileName}</p>
           <p className="text-muted-foreground mt-1">{profileTitle}</p>
+          <Badge variant="outline" className="mx-auto mt-3 border-slate-300 bg-slate-50 text-slate-700">
+            Available for backend and GenAI roles
+          </Badge>
 
           <div className="flex justify-center mt-4 space-x-2">
             {socialLinks.map(({ href, icon, label }) => {
@@ -81,14 +86,19 @@ export function ProfileSidebar({ baseUrl, isGeneratingPdf, onDownloadPdf, onGene
       </Card>
 
       <div className="hidden md:block mt-8">
-        <Card className="border-none shadow-lg">
+        <Card data-reveal className="border border-blue-100 bg-blue-50/40 shadow-lg">
           <CardContent className="pt-6">
             <nav className="space-y-2" aria-label="Section navigation">
               {navItems.map(({ href, label }) => (
                 <a
                   key={label}
                   href={href}
-                  className="flex px-4 py-2 rounded-md hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className={cn(
+                    'flex px-4 py-2 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                    activeSection === href.replace('#', '')
+                      ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-600 font-semibold'
+                      : 'hover:bg-blue-100/70 text-slate-700'
+                  )}
                 >
                   {label}
                 </a>
