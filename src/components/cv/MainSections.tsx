@@ -1,23 +1,25 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  aboutSummary,
   contactDetails,
-  coreStack,
   educationEntries,
   experiences,
-  heroValueStatement,
   keyProjects,
   personalDetails,
   profileName,
   profileTitle,
+  roleVariantProfiles,
+  roleVariants,
+  selectedAchievementsByVariant,
   skillGroups,
   socialLinks,
   socialProofBadge,
   statsStrip,
+  type RoleVariant,
 } from '@/data/cvData';
+import { trackCtaClick } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
 import {
   Award,
@@ -30,11 +32,14 @@ import {
   MapPin,
   Phone,
   Sparkles,
+  Trophy,
   type LucideIcon,
 } from 'lucide-react';
 
 type MainSectionsProps = {
+  activeVariant: RoleVariant;
   onDownloadPdf: () => void;
+  onVariantChange: (variant: RoleVariant) => void;
 };
 
 type SectionTitleProps = {
@@ -58,8 +63,11 @@ function SectionTitle({ title, subtitle, icon: Icon, accentClassName }: SectionT
   );
 }
 
-export function MainSections({ onDownloadPdf }: MainSectionsProps) {
+export function MainSections({ activeVariant, onDownloadPdf, onVariantChange }: MainSectionsProps) {
   const linkedInProfile = socialLinks.find((link) => link.icon === 'linkedin')?.href ?? '#';
+  const variantProfile = roleVariantProfiles[activeVariant];
+  const selectedAchievements = selectedAchievementsByVariant[activeVariant];
+  const featuredProjects = keyProjects.filter((project) => project.focus.includes(activeVariant)).slice(0, 2);
 
   return (
     <div className="space-y-8 pt-16 md:pt-0">
@@ -73,13 +81,53 @@ export function MainSections({ onDownloadPdf }: MainSectionsProps) {
 
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-700">{profileTitle}</p>
             <h1 className="mt-2 text-3xl font-bold leading-tight text-slate-900 md:text-5xl">{profileName}</h1>
-            <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-700 md:text-lg">{heroValueStatement}</p>
+            <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-700 md:text-lg">{variantProfile.valueStatement}</p>
+
+            <div className="mt-6">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">Recruiter View</p>
+              <div className="flex flex-wrap gap-2">
+                {roleVariants.map((variant) => (
+                  <button
+                    key={variant.value}
+                    type="button"
+                    className={cn(
+                      'rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
+                      activeVariant === variant.value
+                        ? 'border-blue-700 bg-blue-700 text-white'
+                        : 'border-slate-300 bg-white text-slate-700 hover:border-blue-300 hover:text-blue-700'
+                    )}
+                    aria-pressed={activeVariant === variant.value}
+                    onClick={() => {
+                      onVariantChange(variant.value);
+                      trackCtaClick({ action: `variant_${variant.value}`, location: 'hero', variant: variant.value });
+                    }}
+                  >
+                    {variant.label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-sm text-slate-600">{roleVariants.find((variant) => variant.value === activeVariant)?.description}</p>
+            </div>
 
             <div className="mt-6 flex flex-wrap gap-3">
               <Button asChild size="lg" className="bg-blue-700 text-white hover:bg-blue-800">
-                <a href="#contact">Contact</a>
+                <a
+                  href="#contact"
+                  onClick={() => {
+                    trackCtaClick({ action: 'hero_contact', location: 'hero', variant: activeVariant, href: '#contact' });
+                  }}
+                >
+                  Contact
+                </a>
               </Button>
-              <Button size="lg" variant="outline" onClick={onDownloadPdf}>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => {
+                  trackCtaClick({ action: 'hero_download_cv', location: 'hero', variant: activeVariant });
+                  onDownloadPdf();
+                }}
+              >
                 Download CV
               </Button>
             </div>
@@ -100,6 +148,29 @@ export function MainSections({ onDownloadPdf }: MainSectionsProps) {
         </Card>
       </section>
 
+      <section data-reveal className="scroll-mt-20">
+        <Card className="border border-indigo-100 bg-indigo-50/50 shadow-lg">
+          <CardHeader>
+            <SectionTitle
+              title="Selected Achievements"
+              subtitle="Fast scan highlights tailored to the selected recruiter view."
+              icon={Trophy}
+              accentClassName="bg-indigo-700"
+            />
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 md:grid-cols-3">
+              {selectedAchievements.map((achievement) => (
+                <article key={achievement.title} className="rounded-lg border border-indigo-200 bg-white p-4">
+                  <h3 className="text-base font-semibold text-slate-900">{achievement.title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-slate-700">{achievement.detail}</p>
+                </article>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
       <section id="about" data-reveal className="scroll-mt-20">
         <Card className="border border-blue-100 bg-blue-50/50 shadow-lg">
           <CardHeader>
@@ -111,11 +182,11 @@ export function MainSections({ onDownloadPdf }: MainSectionsProps) {
             />
           </CardHeader>
           <CardContent>
-            <p className="max-w-3xl leading-relaxed text-slate-700">{aboutSummary}</p>
+            <p className="max-w-3xl leading-relaxed text-slate-700">{variantProfile.aboutSummary}</p>
             <div className="mt-6">
               <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-700">Core Stack</h3>
               <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
-                {coreStack.map((skill) => (
+                {variantProfile.coreStack.map((skill) => (
                   <Badge key={skill} variant="outline" className="justify-center border-blue-200 bg-white py-2 text-slate-700">
                     {skill}
                   </Badge>
@@ -138,7 +209,7 @@ export function MainSections({ onDownloadPdf }: MainSectionsProps) {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
-              {keyProjects.map((project) => (
+              {featuredProjects.map((project) => (
                 <article key={project.title} className="rounded-lg border border-emerald-200 bg-white p-5 shadow-sm">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <h3 className="text-xl font-semibold text-slate-900">{project.title}</h3>
@@ -305,7 +376,7 @@ export function MainSections({ onDownloadPdf }: MainSectionsProps) {
           <CardHeader>
             <SectionTitle
               title="Get In Touch"
-              subtitle="Open to senior backend and platform-focused opportunities."
+              subtitle="Open to senior backend, platform, and applied GenAI opportunities."
               icon={Mail}
               accentClassName="bg-blue-700"
             />
@@ -314,13 +385,49 @@ export function MainSections({ onDownloadPdf }: MainSectionsProps) {
             <div className="rounded-lg border border-blue-200 bg-white p-5">
               <div className="flex flex-wrap gap-3">
                 <Button asChild size="lg" className="bg-blue-700 text-white hover:bg-blue-800">
-                  <a href={`mailto:${contactDetails.email}`}>Let&apos;s Talk</a>
+                  <a
+                    href={`mailto:${contactDetails.email}`}
+                    onClick={() => {
+                      trackCtaClick({
+                        action: 'contact_lets_talk',
+                        location: 'contact',
+                        variant: activeVariant,
+                        href: `mailto:${contactDetails.email}`,
+                      });
+                    }}
+                  >
+                    Let&apos;s Talk
+                  </a>
                 </Button>
                 <Button asChild variant="outline">
-                  <a href={`mailto:${contactDetails.email}`}>Email</a>
+                  <a
+                    href={`mailto:${contactDetails.email}`}
+                    onClick={() => {
+                      trackCtaClick({
+                        action: 'contact_email',
+                        location: 'contact',
+                        variant: activeVariant,
+                        href: `mailto:${contactDetails.email}`,
+                      });
+                    }}
+                  >
+                    Email
+                  </a>
                 </Button>
                 <Button asChild variant="outline">
-                  <a href={linkedInProfile} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={linkedInProfile}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                      trackCtaClick({
+                        action: 'contact_linkedin',
+                        location: 'contact',
+                        variant: activeVariant,
+                        href: linkedInProfile,
+                      });
+                    }}
+                  >
                     <Linkedin className="mr-2 h-4 w-4" /> LinkedIn
                   </a>
                 </Button>

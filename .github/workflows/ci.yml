@@ -33,6 +33,16 @@ jobs:
         if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
         run: npx playwright install --with-deps chromium
 
+      - name: Resolve Chromium Path
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+        run: echo "LHCI_CHROMIUM_PATH=$(node -e \"console.log(require('@playwright/test').chromium.executablePath())\")" >> $GITHUB_ENV
+
+      - name: Lighthouse Budget Checks
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+        env:
+          LHCI_CHROMIUM_PATH: ${{ env.LHCI_CHROMIUM_PATH }}
+        run: npm run lighthouse:ci
+
       - name: E2E Smoke Tests
         if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
         run: npm run test:e2e

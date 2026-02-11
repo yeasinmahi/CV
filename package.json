@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint --quiet ./src",
+    "lighthouse:ci": "lhci autorun --config=./lighthouserc.json",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json",
     "test:e2e": "playwright test"
@@ -25,6 +26,7 @@
     "tailwind-merge": "^2.5.2"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
     "@eslint/js": "^9.9.0",
     "@playwright/test": "^1.54.2",
     "@types/node": "^22.5.5",

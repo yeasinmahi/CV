@@ -2,7 +2,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { contactDetails, navItems, profileName, profileTitle, socialLinks } from '@/data/cvData';
+import { contactDetails, navItems, profileName, profileTitle, socialLinks, type RoleVariant } from '@/data/cvData';
+import { trackCtaClick } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
 import { Facebook, Github, Globe, Linkedin, Mail, Phone, Download, MapPin, type LucideIcon } from 'lucide-react';
 
@@ -15,12 +16,13 @@ const socialIconMap: Record<(typeof socialLinks)[number]['icon'], LucideIcon> = 
 type ProfileSidebarProps = {
   baseUrl: string;
   activeSection: string;
+  activeVariant: RoleVariant;
   isGeneratingPdf: boolean;
   onDownloadPdf: () => void;
   onGeneratePdf: () => void;
 };
 
-export function ProfileSidebar({ baseUrl, activeSection, isGeneratingPdf, onDownloadPdf, onGeneratePdf }: ProfileSidebarProps) {
+export function ProfileSidebar({ baseUrl, activeSection, activeVariant, isGeneratingPdf, onDownloadPdf, onGeneratePdf }: ProfileSidebarProps) {
   return (
     <div className="sticky top-8">
       <Card data-reveal className="border border-slate-200/70 shadow-lg">
@@ -39,7 +41,15 @@ export function ProfileSidebar({ baseUrl, activeSection, isGeneratingPdf, onDown
               const Icon = socialIconMap[icon];
               return (
                 <Button key={label} size="icon" variant="ghost" asChild>
-                  <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    onClick={() => {
+                      trackCtaClick({ action: `sidebar_social_${icon}`, location: 'social', variant: activeVariant, href });
+                    }}
+                  >
                     <Icon className="h-5 w-5" />
                   </a>
                 </Button>
@@ -75,11 +85,26 @@ export function ProfileSidebar({ baseUrl, activeSection, isGeneratingPdf, onDown
           </div>
 
           <div className="space-y-2 mt-6">
-            <Button variant="outline" className="w-full" onClick={onDownloadPdf}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                trackCtaClick({ action: 'sidebar_download_pdf', location: 'sidebar', variant: activeVariant });
+                onDownloadPdf();
+              }}
+            >
               <Download className="mr-2 h-4 w-4" /> Download PDF
             </Button>
-            <Button variant="outline" className="w-full" onClick={onGeneratePdf} disabled={isGeneratingPdf}>
-              <Download className="mr-2 h-4 w-4" /> {isGeneratingPdf ? 'Generating...' : 'Generate PDF'}
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                trackCtaClick({ action: 'sidebar_generate_ats_pdf', location: 'sidebar', variant: activeVariant });
+                onGeneratePdf();
+              }}
+              disabled={isGeneratingPdf}
+            >
+              <Download className="mr-2 h-4 w-4" /> {isGeneratingPdf ? 'Generating...' : 'Generate ATS PDF'}
             </Button>
           </div>
         </CardContent>
@@ -93,6 +118,9 @@ export function ProfileSidebar({ baseUrl, activeSection, isGeneratingPdf, onDown
                 <a
                   key={label}
                   href={href}
+                  onClick={() => {
+                    trackCtaClick({ action: `sidebar_nav_${href.replace('#', '')}`, location: 'nav', variant: activeVariant, href });
+                  }}
                   className={cn(
                     'flex px-4 py-2 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                     activeSection === href.replace('#', '')

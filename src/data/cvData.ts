@@ -1,4 +1,5 @@
 export type SocialIconKey = 'github' | 'linkedin' | 'facebook';
+export type RoleVariant = 'backend' | 'platform' | 'genai';
 
 export interface NavItem {
   href: string;
@@ -18,6 +19,7 @@ export interface ProjectEntry {
   solution: string;
   impact: string;
   tech: string[];
+  focus: RoleVariant[];
 }
 
 export interface ExperienceEntry {
@@ -50,11 +52,94 @@ export interface StatItem {
   label: string;
 }
 
+export interface RoleVariantOption {
+  value: RoleVariant;
+  label: string;
+  description: string;
+}
+
+export interface RoleVariantProfile {
+  valueStatement: string;
+  aboutSummary: string;
+  coreStack: string[];
+}
+
+export interface AchievementItem {
+  title: string;
+  detail: string;
+}
+
 export const profileName = 'Md. Yeasin Arafat';
 export const profileTitle = 'Sr. Software Engineer';
-export const heroValueStatement =
-  'I build production-ready backend platforms and GenAI assistants that simplify operations and deliver measurable business outcomes.';
+export const defaultRoleVariant: RoleVariant = 'backend';
 export const socialProofBadge = 'Worked on Singapore government Town Council GenAI project';
+
+export const roleVariants: RoleVariantOption[] = [
+  {
+    value: 'backend',
+    label: 'Backend CV',
+    description: 'API-first backend engineering and service reliability focus.',
+  },
+  {
+    value: 'platform',
+    label: 'Platform CV',
+    description: 'Cross-cloud data and platform operations focus.',
+  },
+  {
+    value: 'genai',
+    label: 'GenAI CV',
+    description: 'Applied GenAI assistant delivery and retrieval quality focus.',
+  },
+];
+
+export const roleVariantProfiles: Record<RoleVariant, RoleVariantProfile> = {
+  backend: {
+    valueStatement:
+      'I design and deliver backend platforms that turn complex business flows into reliable APIs, integrations, and production services.',
+    aboutSummary:
+      'Senior backend engineer with 10+ years of experience delivering API-first platforms, event-driven services, and enterprise integrations. I focus on dependable architecture, fast delivery, and practical leadership that improves team output.',
+    coreStack: ['C# / ASP.NET', 'Microservices', 'REST APIs', 'NATS / Kafka', 'SQL Server / PostgreSQL', 'CI/CD'],
+  },
+  platform: {
+    valueStatement:
+      'I build cloud-ready platform pipelines that improve data reliability, observability, and enterprise integration speed.',
+    aboutSummary:
+      'Senior engineer focused on platform reliability across ingestion pipelines, event streams, and monitoring workflows. I have delivered production workloads across AWS and Azure while aligning teams around maintainable operations.',
+    coreStack: ['AWS + Azure', 'Ingestion Pipelines', 'Event Streaming', 'Observability', 'Docker', 'Power BI'],
+  },
+  genai: {
+    valueStatement:
+      'I deliver GenAI assistants grounded in business data so teams get faster, more relevant answers they can trust.',
+    aboutSummary:
+      'Senior engineer working on applied GenAI systems for enterprise support workflows. I build ingestion and retrieval pipelines that keep answers scoped to domain-specific business knowledge and operational context.',
+    coreStack: ['GenAI Assistants', 'RAG Workflows', 'Knowledge Ingestion', 'SharePoint/PDF Parsing', 'C# / ASP.NET', 'Prompt Quality'],
+  },
+};
+
+export const statsStrip: StatItem[] = [
+  { value: '10+', label: 'Years Experience' },
+  { value: '2', label: 'Cloud Platforms' },
+  { value: '6', label: 'Data Source Types' },
+  { value: '5+', label: 'Enterprise Integrations' },
+];
+
+export const selectedAchievementsByVariant: Record<RoleVariant, AchievementItem[]> = {
+  backend: [
+    { title: '5+ Integrations', detail: 'Integrated multiple partner systems across identity, upsell, and enterprise data workflows.' },
+    { title: '3 Core Apps', detail: 'Delivered ASP.NET applications for exam, CMS, and BOS admin operations at Banglalink.' },
+    { title: '6 Source Types', detail: 'Enabled unified ingestion from PDF, SharePoint, JSON, Word, text, and websites for AI workflows.' },
+  ],
+  platform: [
+    { title: '2 Clouds', detail: 'Delivered mirrored ingestion across AWS S3 and Azure Blob for resiliency.' },
+    { title: 'NATS Events', detail: 'Published telemetry streams for downstream analytics and vendor data consumption.' },
+    { title: 'Power BI Ops', detail: 'Improved incident triage speed through centralized operational dashboards.' },
+  ],
+  genai: [
+    { title: 'Gov Project', detail: 'Delivered a Singapore Town Council GenAI assistant for business support workflows.' },
+    { title: 'Council Scope', detail: 'Implemented Town Council data separation for context-safe answer retrieval.' },
+    { title: '6 Data Inputs', detail: 'Supported ingestion and training from six enterprise knowledge source types.' },
+  ],
+};
 
 export const navItems: NavItem[] = [
   { href: '#about', label: 'About' },
@@ -79,44 +164,36 @@ export const contactDetails = {
   nationality: 'Bangladeshi',
 };
 
-export const aboutSummary =
-  'Senior backend engineer with 10+ years of experience delivering API-first platforms, event-driven services, and enterprise integrations. I focus on dependable architecture, fast delivery, and practical leadership that improves team output.';
-
-export const statsStrip: StatItem[] = [
-  { value: '10+', label: 'Years Experience' },
-  { value: '2', label: 'Cloud Platforms' },
-  { value: '6', label: 'Data Source Types' },
-  { value: '5+', label: 'Enterprise Integrations' },
-];
-
-export const coreStack = [
-  'C# / ASP.NET',
-  'Microservices',
-  'AWS + Azure',
-  'NATS / Kafka',
-  'SQL Server / PostgreSQL',
-  'GenAI Assistants',
-];
-
 export const keyProjects: ProjectEntry[] = [
   {
     title: 'Singapore Town Council GenAI Assistant',
     period: '2025 - Present',
-    problem: 'Town Council teams spent time manually searching fragmented SOP and policy knowledge before responding.',
+    problem: 'Town Council teams spent time searching fragmented SOP and policy references before responding.',
     solution:
-      'Built a council-scoped GenAI assistant trained via ingestion pipelines across PDF, SharePoint, JSON, Word, text, and websites.',
+      'Built a council-scoped GenAI assistant with ingestion pipelines across PDF, SharePoint, JSON, Word, text, and websites.',
     impact:
-      'Faster knowledge retrieval, improved answer relevance, and clearer separation of responses by individual Town Council business context.',
+      'Reduced manual lookup time and improved answer relevance by enforcing Town Council-specific business context at retrieval time.',
     tech: ['C#', 'ASP.NET', 'GenAI', 'RAG', 'SharePoint', 'JSON'],
+    focus: ['backend', 'genai'],
   },
   {
     title: 'Cross-Cloud IoT Data Platform',
     period: '2023 - Present',
-    problem: 'IoT data delivery and analytics were affected by fragmented vendor pipelines and weak observability.',
+    problem: 'IoT analytics workflows suffered from fragmented vendor feeds and limited operational visibility.',
     solution:
-      'Implemented mirrored ingestion workflows across AWS S3 and Azure Blob with NATS event publishing and dashboarded operations.',
-    impact: 'Higher data reliability, improved monitoring, and faster issue triage for downstream analytics teams.',
+      'Implemented mirrored ingestion across AWS S3 and Azure Blob with NATS event publishing and consolidated Power BI monitoring.',
+    impact: 'Improved data pipeline reliability and reduced incident triage time for downstream analytics consumers.',
     tech: ['AWS S3', 'Azure Blob', 'NATS', 'Power BI', 'SQL Server'],
+    focus: ['backend', 'platform', 'genai'],
+  },
+  {
+    title: 'Enterprise Partner Integration Suite',
+    period: '2019 - 2023',
+    problem: 'Partner onboarding and customer campaign launches were slowed by manual integration dependencies.',
+    solution: 'Delivered reusable ASP.NET integration services and automated Windows services for messaging and bonus workflows.',
+    impact: 'Accelerated rollout for 5+ partner integrations and improved recurring campaign operations.',
+    tech: ['ASP.NET', 'Windows Services', 'API Integration', 'SQL Server', 'Monitoring'],
+    focus: ['backend', 'platform'],
   },
 ];
 
@@ -126,13 +203,13 @@ export const experiences: ExperienceEntry[] = [
     company: 'Surbana Jurong',
     period: 'May 2023 - Present',
     bullets: [
-      'Led development of a Singapore government Town Council GenAI assistant for business support workflows.',
-      'Cut knowledge onboarding effort by implementing ingestion and training across 6 source formats.',
-      'Improved response precision by implementing council-specific data separation for each Town Council.',
-      'Increased backend reliability by delivering ingestion pipelines across 2 cloud platforms (AWS and Azure).',
-      'Enabled vendor analytics consumption through NATS-based aggregated telemetry publishing.',
-      'Improved sprint delivery consistency as unofficial lead for the Bangladesh engineering team.',
-      'Reduced onboarding integration issues with DHL via backend transformation plugins.',
+      'Delivered 1 Singapore government Town Council GenAI assistant for business support workflows.',
+      'Enabled ingestion and training across 6 source formats: PDF, SharePoint, JSON, Word, text, and websites.',
+      'Implemented Town Council-specific data separation for context-safe, council-level answer retrieval.',
+      'Built ingestion pipelines across 2 cloud platforms (AWS S3 and Azure Blob) to improve resilience.',
+      'Published aggregated telemetry via NATS streams for downstream analytics and vendor consumption.',
+      'Acted as unofficial lead for the Bangladesh engineering pod, improving sprint predictability and release flow.',
+      'Reduced DHL onboarding friction through backend transformation plugin delivery.',
     ],
   },
   {
@@ -140,8 +217,8 @@ export const experiences: ExperienceEntry[] = [
     company: 'Banglalink',
     period: 'Sep 2019 - Apr 2023',
     bullets: [
-      'Accelerated partner launches by integrating 5+ third-party platforms, including identity and upsell systems.',
-      'Delivered 3 ASP.NET applications that supported exam, selfcare CMS, and BOS admin operations.',
+      'Integrated 5+ third-party platforms to accelerate partner launch timelines.',
+      'Delivered 3 ASP.NET applications covering exam, selfcare CMS, and BOS admin operations.',
       'Automated recurring customer workflows with 3 Windows Services for push, SMS, and bonus processing.',
       'Improved incident visibility with service monitoring, SMS/email alerts, and API trend reporting.',
     ],
@@ -151,10 +228,10 @@ export const experiences: ExperienceEntry[] = [
     company: 'Akij Group',
     period: 'Mar 2018 - Sep 2019',
     bullets: [
-      'Delivered core backend modules for 2 enterprise platforms: ERP and Akij Development Architecture (ADA).',
-      'Reduced regression risk by introducing Test-Driven Development (TDD) into existing codebases.',
-      'Automated data movement through SQL Server Integration Services (SSIS) ETL workflows.',
-      'Improved release consistency by managing Azure DevOps pipelines and deployment processes.',
+      'Delivered backend modules for 2 enterprise platforms: ERP and Akij Development Architecture (ADA).',
+      'Reduced regression risk by introducing Test-Driven Development (TDD) in existing codebases.',
+      'Automated enterprise data movement through SSIS ETL workflows.',
+      'Improved release consistency through Azure DevOps CI/CD pipeline ownership.',
     ],
   },
   {
@@ -162,9 +239,9 @@ export const experiences: ExperienceEntry[] = [
     company: 'Futuristic Technologies Limited',
     period: 'Aug 2017 - Mar 2018',
     bullets: [
-      'Led delivery of 4 ASP.NET MVC products: HRMS, multi-vendor ecommerce, diagnostic center, and inventory systems.',
-      'Improved team predictability by owning planning, architecture alignment, and stakeholder communication.',
-      'Delivered supporting Unity and Android applications integrated with business and backend workflows.',
+      'Led delivery of 4 ASP.NET MVC products: HRMS, multivendor ecommerce, diagnostic center, and inventory systems.',
+      'Owned delivery planning, architecture alignment, and stakeholder communication for cross-functional teams.',
+      'Delivered 2 supporting client apps (Unity and Android) integrated with backend business workflows.',
     ],
   },
 ];
@@ -203,17 +280,7 @@ export const skillGroups: SkillGroup[] = [
   {
     value: 'data',
     label: 'Data & Integration',
-    items: [
-      'SQL Server',
-      'PostgreSQL',
-      'MySQL',
-      'SQLite',
-      'SSIS / ETL',
-      'NATS',
-      'Kafka',
-      'Power BI',
-      'JSON / XML',
-    ],
+    items: ['SQL Server', 'PostgreSQL', 'MySQL', 'SQLite', 'SSIS / ETL', 'NATS', 'Kafka', 'Power BI', 'JSON / XML'],
   },
 ];
 

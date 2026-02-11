@@ -1,9 +1,26 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
-import { navItems, profileName } from '@/data/cvData';
+import {
+  contactDetails,
+  defaultRoleVariant,
+  educationEntries,
+  experiences,
+  keyProjects,
+  navItems,
+  personalDetails,
+  profileName,
+  profileTitle,
+  roleVariantProfiles,
+  selectedAchievementsByVariant,
+  skillGroups,
+  socialLinks,
+  statsStrip,
+  type RoleVariant,
+} from '@/data/cvData';
 import { ProfileSidebar } from '@/components/cv/ProfileSidebar';
 import { MainSections } from '@/components/cv/MainSections';
+import { trackCtaClick } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
 
 type JsPdfInstance = {
@@ -13,7 +30,10 @@ type JsPdfInstance = {
       getHeight: () => number;
     };
   };
-  addImage: (...args: unknown[]) => void;
+  setFont: (fontName: string, fontStyle?: 'normal' | 'bold' | 'italic' | 'bolditalic') => void;
+  setFontSize: (fontSize: number) => void;
+  text: (text: string | string[], x: number, y: number) => void;
+  splitTextToSize: (text: string, size: number) => string[];
   addPage: () => void;
   save: (filename: string) => void;
 };
@@ -23,12 +43,11 @@ type JsPdfConstructor = new (orientation: string, unit: string, format: string) 
 export default function CV() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('about');
+  const [activeVariant, setActiveVariant] = useState<RoleVariant>(defaultRoleVariant);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
-  // Get the base URL for assets
   const baseUrl = import.meta.env.BASE_URL;
 
-  // Function to download pre-made PDF file
   const downloadPDF = () => {
     const link = document.createElement('a');
     link.href = `${baseUrl}Yeasin_Arafat_CV.pdf`;
@@ -38,90 +57,160 @@ export default function CV() {
     document.body.removeChild(link);
   };
 
-  // Function to generate PDF from webpage
-  const generatePDF = async () => {
-    const element = document.getElementById('cv-content');
-    if (!element || isGeneratingPdf) return;
+  const handleDownloadPdf = () => {
+    trackCtaClick({ action: 'download_prebuilt_pdf', location: 'sidebar', variant: activeVariant });
+    downloadPDF();
+  };
 
-    const stickyElements = Array.from(element.querySelectorAll<HTMLElement>('.sticky'));
-    const revealElements = Array.from(element.querySelectorAll<HTMLElement>('[data-reveal]'));
-    const stickyStyles = stickyElements.map((stickyElement) => ({
-      element: stickyElement,
-      position: stickyElement.style.position,
-      top: stickyElement.style.top,
-    }));
-    const revealVisibilityState = revealElements.map((revealElement) => ({
-      element: revealElement,
-      wasVisible: revealElement.classList.contains('is-visible'),
-    }));
+  const generatePDF = async () => {
+    if (isGeneratingPdf) return;
 
     setIsGeneratingPdf(true);
 
     try {
-      const [{ default: html2canvas }, jsPdfModule] = await Promise.all([import('html2canvas'), import('jspdf')]);
+      const jsPdfModule = await import('jspdf');
       const jsPdfSource = jsPdfModule as { jsPDF?: JsPdfConstructor; default?: JsPdfConstructor };
       const JsPdf = jsPdfSource.jsPDF ?? jsPdfSource.default;
       if (!JsPdf) {
         throw new Error('Unable to load jsPDF constructor');
       }
 
-      // Temporarily remove sticky positioning for better PDF generation
-      stickyElements.forEach((stickyElement) => {
-        stickyElement.style.position = 'static';
-        stickyElement.style.top = 'auto';
-      });
-      revealElements.forEach((revealElement) => {
-        revealElement.classList.add('is-visible');
-      });
-
-      // Configure html2canvas options
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        height: element.scrollHeight,
-        windowHeight: element.scrollHeight,
-        scrollY: -window.scrollY,
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-
-      // Fit PDF to full width and paginate by height.
       const pdf = new JsPdf('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
+      const margin = 14;
+      const contentWidth = pdfWidth - margin * 2;
+      const lineHeight = 5;
+      const variantProfile = roleVariantProfiles[activeVariant];
+      const selectedAchievements = selectedAchievementsByVariant[activeVariant];
+      const featuredProjects = keyProjects.filter((project) => project.focus.includes(activeVariant)).slice(0, 2);
+      const linkedInProfile = socialLinks.find((link) => link.icon === 'linkedin')?.href ?? '';
 
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let y = margin;
 
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
-      }
-
-      pdf.save('Yeasin_Arafat_CV_Generated.pdf');
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Error generating PDF. Please try again.');
-    } finally {
-      stickyStyles.forEach(({ element: stickyElement, position, top }) => {
-        stickyElement.style.position = position;
-        stickyElement.style.top = top;
-      });
-      revealVisibilityState.forEach(({ element: revealElement, wasVisible }) => {
-        if (!wasVisible) {
-          revealElement.classList.remove('is-visible');
+      const ensureSpace = (requiredHeight = lineHeight) => {
+        if (y + requiredHeight > pdfHeight - margin) {
+          pdf.addPage();
+          y = margin;
         }
+      };
+
+      const writeTitle = (text: string) => {
+        ensureSpace(8);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(18);
+        pdf.text(text, margin, y);
+        y += 8;
+      };
+
+      const writeSubTitle = (text: string) => {
+        ensureSpace(6);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(12);
+        pdf.text(text, margin, y);
+        y += 6;
+      };
+
+      const writeSection = (title: string) => {
+        ensureSpace(8);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(13);
+        pdf.text(title, margin, y);
+        y += 6;
+      };
+
+      const writeParagraph = (text: string) => {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10.5);
+        const lines = pdf.splitTextToSize(text, contentWidth);
+        lines.forEach((line) => {
+          ensureSpace(lineHeight);
+          pdf.text(line, margin, y);
+          y += lineHeight;
+        });
+        y += 1.5;
+      };
+
+      const writeBullets = (items: string[]) => {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10.5);
+        items.forEach((item) => {
+          const lines = pdf.splitTextToSize(`- ${item}`, contentWidth);
+          lines.forEach((line) => {
+            ensureSpace(lineHeight);
+            pdf.text(line, margin, y);
+            y += lineHeight;
+          });
+        });
+        y += 1.5;
+      };
+
+      writeTitle(profileName);
+      writeSubTitle(`${profileTitle} | Recruiter view: ${activeVariant.toUpperCase()}`);
+      writeParagraph(`Contact: ${contactDetails.email} | ${contactDetails.phone} | ${contactDetails.location}`);
+      if (linkedInProfile) {
+        writeParagraph(`LinkedIn: ${linkedInProfile}`);
+      }
+      writeParagraph(variantProfile.valueStatement);
+
+      writeSection('Selected Achievements');
+      writeBullets(selectedAchievements.map((achievement) => `${achievement.title}: ${achievement.detail}`));
+
+      writeSection('Stats');
+      writeParagraph(statsStrip.map((stat) => `${stat.value} ${stat.label}`).join(' | '));
+
+      writeSection('About');
+      writeParagraph(variantProfile.aboutSummary);
+
+      writeSection('Core Stack');
+      writeParagraph(variantProfile.coreStack.join(', '));
+
+      writeSection('Key Projects');
+      featuredProjects.forEach((project) => {
+        writeParagraph(`${project.title} (${project.period})`);
+        writeParagraph(`Problem: ${project.problem}`);
+        writeParagraph(`Solution: ${project.solution}`);
+        writeParagraph(`Impact: ${project.impact}`);
+        writeParagraph(`Tech: ${project.tech.join(', ')}`);
       });
+
+      writeSection('Experience');
+      experiences.forEach((experience) => {
+        writeParagraph(`${experience.role} | ${experience.company} | ${experience.period}`);
+        writeBullets(experience.bullets);
+      });
+
+      writeSection('Skills');
+      skillGroups.forEach((skillGroup) => {
+        writeParagraph(`${skillGroup.label}: ${skillGroup.items.join(', ')}`);
+      });
+
+      writeSection('Education');
+      educationEntries.forEach((entry) => {
+        writeParagraph(`${entry.degree} | ${entry.institution} | ${entry.period}`);
+        writeParagraph(entry.details);
+      });
+
+      writeSection('Personal Details');
+      personalDetails.forEach((detail) => {
+        writeParagraph(`${detail.label}: ${detail.value}`);
+      });
+
+      trackCtaClick({ action: 'generate_ats_pdf', location: 'sidebar', variant: activeVariant });
+      pdf.save(`Yeasin_Arafat_CV_ATS_${activeVariant.toUpperCase()}.pdf`);
+    } catch (error) {
+      console.error('Error generating ATS PDF:', error);
+      alert('Error generating ATS PDF. Please try again.');
+    } finally {
       setIsGeneratingPdf(false);
+    }
+  };
+
+  const handleVariantChange = (variant: RoleVariant) => {
+    setActiveVariant(variant);
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.focus();
     }
   };
 
@@ -185,7 +274,7 @@ export default function CV() {
     return () => {
       revealObserver.disconnect();
     };
-  }, []);
+  }, [activeVariant]);
 
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
@@ -252,7 +341,10 @@ export default function CV() {
                       'rounded-md px-4 py-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                       activeSection === sectionId ? 'bg-blue-600 text-white' : 'text-slate-700 hover:bg-slate-100'
                     )}
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={() => {
+                      trackCtaClick({ action: `mobile_nav_${sectionId}`, location: 'nav', variant: activeVariant, href });
+                      setMobileMenuOpen(false);
+                    }}
                   >
                     {label}
                   </a>
@@ -269,14 +361,15 @@ export default function CV() {
             <ProfileSidebar
               baseUrl={baseUrl}
               activeSection={activeSection}
+              activeVariant={activeVariant}
               isGeneratingPdf={isGeneratingPdf}
-              onDownloadPdf={downloadPDF}
+              onDownloadPdf={handleDownloadPdf}
               onGeneratePdf={generatePDF}
             />
           </div>
 
           <main id="main-content" className="md:col-span-8 lg:col-span-9" tabIndex={-1}>
-            <MainSections onDownloadPdf={downloadPDF} />
+            <MainSections activeVariant={activeVariant} onVariantChange={handleVariantChange} onDownloadPdf={handleDownloadPdf} />
           </main>
         </div>
       </div>

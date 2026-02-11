@@ -28,12 +28,12 @@ test.describe('portfolio smoke tests', () => {
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toContain('Yeasin_Arafat_CV');
 
-    const generateButton = page.getByRole('button', { name: 'Generate PDF' });
+    const generateButton = page.getByRole('button', { name: /Generate (ATS )?PDF/ });
     await expect(generateButton).toBeEnabled();
     await generateButton.click();
 
     await expect(page.getByRole('button', { name: 'Generating...' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Generate PDF' })).toBeVisible({ timeout: 120_000 });
+    await expect(page.getByRole('button', { name: /Generate (ATS )?PDF/ })).toBeVisible({ timeout: 120_000 });
     expect(dialogs).toHaveLength(0);
   });
 });
