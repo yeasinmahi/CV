@@ -30,7 +30,9 @@ jobs:
         run: npm run build
 
       - name: Install Playwright Browser
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
         run: npx playwright install --with-deps chromium
 
       - name: E2E Smoke Tests
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
         run: npm run test:e2e
